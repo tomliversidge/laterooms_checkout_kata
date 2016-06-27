@@ -39,13 +39,25 @@ namespace CheckoutKata
         }
 
         [Fact]
-        public void can_apply_offers_at_checkout()
+        public void can_apply_one_offer_at_checkout()
         {
             var checkout = new Checkout();    
             checkout.Scan(_item1);
             checkout.Scan(_item1);
             checkout.Scan(_item1);
             Assert.Equal(130, checkout.GetTotal());
+        }
+
+        [Fact]
+        public void can_apply_two_offers_at_checkout()
+        {
+            var checkout = new Checkout();
+            checkout.Scan(_item1);
+            checkout.Scan(_item1);
+            checkout.Scan(_item1);
+            checkout.Scan(_item2);
+            checkout.Scan(_item2);
+            Assert.Equal(175, checkout.GetTotal());
         }
     }
 
@@ -66,7 +78,9 @@ namespace CheckoutKata
 
         private double Discount(IEnumerable<Item> items)
         {
-            return items.Count(item => item.Sku == "A") == 3 ? 20 : 0;
+            var aDiscount = items.Count(item => item.Sku == "A") == 3 ? 20 : 0;
+            var bDiscount = items.Count(item => item.Sku == "B") == 2 ? 15 : 0;
+            return aDiscount + bDiscount;
         }
     }
 }
