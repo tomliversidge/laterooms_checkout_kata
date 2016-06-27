@@ -18,24 +18,34 @@ namespace CheckoutKata
 
     public class CheckoutTests
     {
+        private Item _item1 = new Item("A", 50);
+        private Item _item2 = new Item("B", 30);
+        
         [Fact]
         public void can_scan_a_single_item_and_get_total()
         {
-            var item = new Item("A", 50);
             var checkout = new Checkout();
-            checkout.Scan(item);
+            checkout.Scan(_item1);
             Assert.Equal(50, checkout.GetTotal());
         }
 
         [Fact]
         public void can_scan_two_items_and_get_total()
         {
-            var item1 = new Item("A", 50);
-            var item2 = new Item("B", 30);
             var checkout = new Checkout();
-            checkout.Scan(item1);
-            checkout.Scan(item2);
+            checkout.Scan(_item1);
+            checkout.Scan(_item2);
             Assert.Equal(80, checkout.GetTotal());
+        }
+
+        [Fact]
+        public void can_apply_offers_at_checkout()
+        {
+            var checkout = new Checkout();    
+            checkout.Scan(_item1);
+            checkout.Scan(_item1);
+            checkout.Scan(_item1);
+            Assert.Equal(130, checkout.GetTotal());
         }
     }
 
@@ -50,7 +60,13 @@ namespace CheckoutKata
 
         public double GetTotal()
         {
-            return _items.Sum(item => item.Price);
+            var subTotal = _items.Sum(item => item.Price);
+            return subTotal - Discount(_items);
+        }
+
+        private double Discount(IEnumerable<Item> items)
+        {
+            return items.Count(item => item.Sku == "A") == 3 ? 20 : 0;
         }
     }
 }
