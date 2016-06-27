@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -13,6 +14,20 @@ namespace CheckoutKata
         {
             Sku = sku;
             Price = price;
+        }
+    }
+
+    public class Offer
+    {
+        public string Sku { get; }
+        public int QualifyingAmount { get; }
+        public double Discount { get; }
+
+        public Offer(string sku, int qualifyingAmount, double discount)
+        {
+            Sku = sku;
+            QualifyingAmount = qualifyingAmount;
+            Discount = discount;
         }
     }
 
@@ -54,7 +69,19 @@ namespace CheckoutKata
             ScanItemMultipleTimes(checkout, _item2, 2);
             Assert.Equal(175, checkout.GetTotal());
         }
-        
+
+        [Fact]
+        public void can_apply_multiple_offers_multiple_times_at_checkout()
+        {
+            var checkout = new Checkout();
+            ScanItemMultipleTimes(checkout, _item1, 6); // total = 300, discount = 40
+            ScanItemMultipleTimes(checkout, _item2, 4); // total = 120, discount = 30
+            var expectedSubTotal = 420;
+            var expectedDiscount = 70;
+            var expectedTotal = expectedSubTotal - expectedDiscount;
+            Assert.Equal(expectedTotal, checkout.GetTotal());
+        }
+
         private void ScanItemMultipleTimes(Checkout checkout, Item item, int numberOfTimesToScan)
         {
             for (int i = 0; i < numberOfTimesToScan; i++)
@@ -78,12 +105,29 @@ namespace CheckoutKata
             var subTotal = _items.Sum(item => item.Price);
             return subTotal - Discount(_items);
         }
-
+        
         private double Discount(IEnumerable<Item> items)
         {
-            var aDiscount = items.Count(item => item.Sku == "A") == 3 ? 20 : 0;
-            var bDiscount = items.Count(item => item.Sku == "B") == 2 ? 15 : 0;
-            return aDiscount + bDiscount;
+            var offers = new List<Offer>
+            {
+                new Offer("A", 3, 20),
+                new Offer("B", 2, 15)
+            };
+
+            double discount = 0;
+            foreach (var offer in offers)
+            {
+                discount += CalculateDiscount(items, offer);
+            }
+
+            return discount;
+        }
+
+        private double CalculateDiscount(IEnumerable<Item> items, Offer offer)
+        {
+            double numberOfItems = items
+                .Count(item => item.Sku == offer.Sku);
+            return Math.Floor(numberOfItems / offer.QualifyingAmount) * offer.Discount;
         }
     }
 }
