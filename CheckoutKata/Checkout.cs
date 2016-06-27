@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace CheckoutKata
 {
@@ -24,17 +26,31 @@ namespace CheckoutKata
             checkout.Scan(item);
             Assert.Equal(50, checkout.GetTotal());
         }
+
+        [Fact]
+        public void can_scan_two_items_and_get_total()
+        {
+            var item1 = new Item("A", 50);
+            var item2 = new Item("B", 30);
+            var checkout = new Checkout();
+            checkout.Scan(item1);
+            checkout.Scan(item2);
+            Assert.Equal(80, checkout.GetTotal());
+        }
     }
 
     public class Checkout
     {
+        private readonly List<Item> _items = new List<Item>(); 
+
         public void Scan(Item item)
         {
+            _items.Add(item);
         }
 
-        public int GetTotal()
+        public double GetTotal()
         {
-            return 50;
+            return _items.Sum(item => item.Price);
         }
     }
 }
