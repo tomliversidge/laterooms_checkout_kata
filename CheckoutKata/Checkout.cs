@@ -13,20 +13,14 @@ namespace CheckoutKata
             _items.Add(item);
         }
 
-        public double GetTotal()
+        public double GetTotal(IEnumerable<Offer> offers)
         {
             var subTotal = _items.Sum(item => item.Price);
-            return subTotal - Discount(_items);
+            return subTotal - Discount(_items, offers);
         }
         
-        private static double Discount(IEnumerable<Item> items)
+        private static double Discount(IEnumerable<Item> items, IEnumerable<Offer> offers)
         {
-            var offers = new List<Offer>
-            {
-                new Offer("A", 3, 20),
-                new Offer("B", 2, 15)
-            };
-
             return offers.Sum(offer => CalculateDiscount(items, offer));
         }
 
