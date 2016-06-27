@@ -18,8 +18,8 @@ namespace CheckoutKata
 
     public class CheckoutTests
     {
-        private Item _item1 = new Item("A", 50);
-        private Item _item2 = new Item("B", 30);
+        private readonly Item _item1 = new Item("A", 50);
+        private readonly Item _item2 = new Item("B", 30);
         
         [Fact]
         public void can_scan_a_single_item_and_get_total()
@@ -41,10 +41,8 @@ namespace CheckoutKata
         [Fact]
         public void can_apply_one_offer_at_checkout()
         {
-            var checkout = new Checkout();    
-            checkout.Scan(_item1);
-            checkout.Scan(_item1);
-            checkout.Scan(_item1);
+            var checkout = new Checkout();
+            ScanItemMultipleTimes(checkout, _item1, 3);
             Assert.Equal(130, checkout.GetTotal());
         }
 
@@ -52,12 +50,17 @@ namespace CheckoutKata
         public void can_apply_two_offers_at_checkout()
         {
             var checkout = new Checkout();
-            checkout.Scan(_item1);
-            checkout.Scan(_item1);
-            checkout.Scan(_item1);
-            checkout.Scan(_item2);
-            checkout.Scan(_item2);
+            ScanItemMultipleTimes(checkout, _item1, 3);
+            ScanItemMultipleTimes(checkout, _item2, 2);
             Assert.Equal(175, checkout.GetTotal());
+        }
+        
+        private void ScanItemMultipleTimes(Checkout checkout, Item item, int numberOfTimesToScan)
+        {
+            for (int i = 0; i < numberOfTimesToScan; i++)
+            {
+                checkout.Scan(item);
+            }
         }
     }
 
